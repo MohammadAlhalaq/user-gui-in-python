@@ -141,15 +141,10 @@ window.title("admin pannale")
 window.geometry("800x500")
 trv.bind('<Double 1>', getrow)
 
-# 2: "name", 3: "birthday", 4: "address", 5: "age"
-
-# here the new windows
-
 
 def update_window(item):
     # { 0: "name", 1: "birthday", 2: "address", 3: "age",4: "id"}
     window1 = Tk()
-    print(item)
     name_input = StringVar(window1)
     birthday_input = StringVar(window1)
     address_input = StringVar(window1)
@@ -163,7 +158,7 @@ def update_window(item):
 
     def clickDelete():
         id = id_input.get()
-        if messagebox.askyesno("Confirm Delete?", "Are you dure you want to delete this customer?"):
+        if messagebox.askyesno("Confirm Delete?", "Are you dure you want to delete this User?"):
             deleteUser(create_connection(database), id)
             refresh()
         else:
@@ -203,31 +198,66 @@ def update_window(item):
         f.close()
         webbrowser.open('UserInfo.html')
 
-    def clickUpdate():
-        userDict = {
-            "id": '0',
-            "name": '',
-            "birthday": '',
-            "address": '',
-            "age": '0'
-        }
-        if name_input.get() != '':
-            userDict["name"] = name_input.get()
-        if birthday_input.get() != '':
-            userDict["birthday"] = birthday_input.get()
-        if address_input.get() != '':
-            userDict["address"] = address_input.get()
-        if age_input.get() != '':
-            userDict["age"] = age_input.get()
-        if id_input.get() != '':
-            userDict["id"] = id_input.get()
+    def validation():
+        birthday = birthday_input.get().split("-")
+        errorState = False
+        errorMessage = ''
+        if name_input.get().isnumeric() == True:
+            errorMessage += "- name must be String and the tall bettween 4 and 25 character\n"
+            errorState = True
+        elif len(name_input.get()) > 25 and len(age_input.get()) < 4:
+            errorMessage += "-lentgh name must be bettween 4 and 25 character\n"
+            errorState = True
+        if len(birthday) != 3:
+            errorMessage += "- birthday must be in the date format eg: 22-12-1999\n"
+            errorState = True
+        elif birthday[0].isnumeric() != True and birthday[1].isnumeric() != True and birthday[2].isnumeric() != True:
+            errorMessage += "- birthday must be in the date format eg: 22-12-1999\n"
+            errorState = True
+        if address_input.get().isnumeric() == True:
+            errorMessage += "- address must be text not a number\n"
+            errorState = True
+        if age_input.get().isnumeric() == False:
+            errorMessage += "- age must be number Not string\n"
+            errorState = True
+        print("error " + str(errorState)+errorMessage)
+        return errorState, errorMessage
 
-        updateAndCheckIsUpdatedSuccessfully(
-            userDict,
-            userDict["id"],
-            create_connection(database)
-        )
-        refresh()
+    def clickUpdate():
+        if messagebox.askyesno("Confirm Update?", "Are you dure you want to Update this User?"):
+            errorState = False
+            errorMessage = ''
+            userDict = {
+                "id": '0',
+                "name": '',
+                "birthday": '',
+                "address": '',
+                "age": '0'
+            }
+            isValid = validation()
+            errorState = isValid[0]
+            errorMessage = isValid[1]
+            print(errorState)
+            if name_input.get() != '':
+                userDict["name"] = name_input.get()
+            if birthday_input.get() != '':
+                userDict["birthday"] = birthday_input.get()
+            if address_input.get() != '':
+                userDict["address"] = address_input.get()
+            if age_input.get() != '':
+                userDict["age"] = age_input.get()
+            if id_input.get() != '':
+                userDict["id"] = id_input.get()
+            if errorState == False:
+                updateAndCheckIsUpdatedSuccessfully(
+                    userDict,
+                    userDict["id"],
+                    create_connection(database)
+                )
+                refresh()
+                messagebox.showinfo("Update User Data", "Done")
+            else:
+                messagebox.showwarning("Wrong", errorMessage)
     label = Label(window1, text="This is a update window")
     label.grid(row=0, column=0)
 
@@ -298,29 +328,10 @@ def update_window(item):
         window1, text="Print User Data", command=clickPrint)
     printBtn.grid(row=6, column=2, padx=5, pady=3)
 
-
-# updatebtnWindow = Button(
-#     window, text="Click to open a update window", command=update_window)
-# updatebtnWindow.pack(pady=10)
-
-# deletebtn = Button(window, text="Click to open a delete window")
-# deletebtn.bind("<Button>", lambda e: delete(window))
-# deletebtn.pack(pady=10)
-
-
-# Entry(
-#     window,
-#     textvariable=id_input,
-#     borderwidth=5,
-# ).grid(row=2, column=1)
-
-
 # ------------------------------------------------
 
 
 # query for update user data
-
-
 def update_user(conn, user):
     """
     update name, birthday, address and age of a user
@@ -348,7 +359,6 @@ def updateUser(newUser, user):
     # copy and update
     for key in user:
         if newUser[key] != '' and newUser[key] != '0':
-            print(newUser[key] + key)
             newDictUser[key] = newUser[key]
         else:
             newDictUser[key] = user[key]
@@ -362,18 +372,18 @@ def updateAndCheckIsUpdatedSuccessfully(updateUserData, id, connection):
 
     userData = updateUser(updateUserData, getUserData(connection, id))
     if userData[1] == False:
-        print("Problem in update, enter the new data in the forms")
+        messagebox.showwarning(
+            "Wrong", "Problem in update, enter the new data in the forms")
     else:
         update_user(connection, (userData[0]["name"], userData[0]["address"],
                                  userData[0]["age"], userData[0]["birthday"], userData[0]["id"]))
         UserDataFromDatabase = getUserData(connection, userData[0]["id"])
         isUpdated = UserDataFromDatabase == userData[0]
-        print(userData[0])
-        print(UserDataFromDatabase)
         if isUpdated:
-            print("Done Done")
+            messagebox.showinfo("Success", "Done Done :)")
         else:
-            print("unfortinatly Problem in update")
+            messagebox.showwarning(
+                "Wrong", "Problem in update, enter the new data in the forms")
 
 
 # -------------------------------------------------------------
@@ -384,35 +394,6 @@ def main():
     # create a database connection
     conn = create_connection(database)
     with conn:
-
-        # print(users)
-        # def getallUser():
-        #     # here select all users
-        #     user = getUserData(conn, id_input.get())
-        #     Label(
-        #         window,
-        #         text="name is "+user["name"]+",    birthday is " +
-        #         user["birthday"]+",    Address is " +
-        #         user["address"]+",    age is "+user["age"],
-        #         foreground="white",
-        #         background="#34A2FE",
-        #         height=3
-        #     ).grid(row=2, column=3)
-
-        # def clickDelete():
-        #     deleteUser(conn, id_input.get())
-
-        # here
-
-        # Button
-
-        # Button(window, text="Update User",
-        #        command=clickUpdate).grid(row=4, column=1)
-        # Button(window, text="Delete User",
-        #        command=clickDelete).grid(row=2, column=5)
-        # Button(window, text="print user data",
-        #        command=printUser).grid(row=2, column=4)
-
         window.mainloop()
 
 
