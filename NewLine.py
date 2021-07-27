@@ -202,25 +202,38 @@ def update_window(item):
         birthday = birthday_input.get().split("-")
         errorState = False
         errorMessage = ''
-        if name_input.get().isnumeric() == True:
-            errorMessage += "- name must be String and the tall bettween 4 and 25 character\n"
-            errorState = True
-        elif len(name_input.get()) > 25 and len(age_input.get()) < 4:
-            errorMessage += "-lentgh name must be bettween 4 and 25 character\n"
-            errorState = True
-        if len(birthday) != 3:
-            errorMessage += "- birthday must be in the date format eg: 22-12-1999\n"
-            errorState = True
-        elif birthday[0].isnumeric() != True and birthday[1].isnumeric() != True and birthday[2].isnumeric() != True:
-            errorMessage += "- birthday must be in the date format eg: 22-12-1999\n"
-            errorState = True
-        if address_input.get().isnumeric() == True:
-            errorMessage += "- address must be text not a number\n"
-            errorState = True
-        if age_input.get().isnumeric() == False:
-            errorMessage += "- age must be number Not string\n"
-            errorState = True
-        print("error " + str(errorState)+errorMessage)
+        if name_input.get().isnumeric() != True:
+            if len(name_input.get()) < 25 and len(name_input.get()) > 4:
+                if len(birthday) == 3:
+                    if birthday[0].isnumeric() == True and birthday[1].isnumeric() == True and birthday[2].isnumeric() == True:
+                        if int(birthday[0]) < 32 and int(birthday[0]) > 0:
+                            if int(birthday[1]) < 13 and int(birthday[1]) > 0:
+                                if int(birthday[2]) > 1860 and int(birthday[2]) < 2014:
+                                    if address_input.get().isnumeric() != True:
+                                        if age_input.get().isnumeric() != False:
+                                            if int(age_input.get()) < 120 and int(age_input.get()) > 9:
+                                                messagebox.showinfo(
+                                                    "Done", "Verifed with no error")
+                                            else:
+                                                return True, "- age must be from 10 to 120\n"
+                                        else:
+                                            return True, "- age must be number Not string\n"
+                                    else:
+                                        return True, "- address must be text not a number\n"
+                                else:
+                                    return True, "- birthday days must be bettween 1860 and 2015\n"
+                            else:
+                                return True, "- birthday months must be bettween 0 and 12\n"
+                        else:
+                            return True, "- birthday days must be bettween 0 and 30\n"
+                    else:
+                        return True, "- birthday must be in the date format eg: 22-12-1999\n"
+                else:
+                    return True, "- birthday must be in the date format eg: 22-12-1999\n"
+            else:
+                return True, "-lentgh name must be bettween 4 and 25 character\n"
+        else:
+            return True, "- name must be String\n"
         return errorState, errorMessage
 
     def clickUpdate():
@@ -237,7 +250,6 @@ def update_window(item):
             isValid = validation()
             errorState = isValid[0]
             errorMessage = isValid[1]
-            print(errorState)
             if name_input.get() != '':
                 userDict["name"] = name_input.get()
             if birthday_input.get() != '':
@@ -255,7 +267,6 @@ def update_window(item):
                     create_connection(database)
                 )
                 refresh()
-                messagebox.showinfo("Update User Data", "Done")
             else:
                 messagebox.showwarning("Wrong", errorMessage)
     label = Label(window1, text="This is a update window")
