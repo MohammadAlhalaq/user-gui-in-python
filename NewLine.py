@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
-database = r"C:\sqlite\db\pythonsqlite.db"
+database = r"C:\sqlite\db\pythonsqlitek.db"
 
 
 def create_connection(db_file):
@@ -25,79 +25,101 @@ def create_connection(db_file):
     return conn
 
 
-def select_user_by_id(conn, id):
+def select_user_test_by_test_id(conn, id):
     """
-    Query users by id
+    Query test_users by test_id
     :param conn: the Connection object
-    :param id:
+    :param test_id:
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE id=?", (id,))
+    cur.execute("SELECT * FROM user_tests WHERE test_id=?", (id,))
     rows = cur.fetchall()
     return rows
 
-# get all userData from DB
+# get all userTestData from DB
 
 
-def select_all_users(conn):
+def select_all_user_tests(conn):
     """
-    Query users by id
+    Query user_tests by test_id
     :param conn: the Connection object
-    :param id:
+    :param test_id:
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT * FROM users")
+    cur.execute("SELECT * FROM user_tests")
     rows = cur.fetchall()
     return rows
 
 
-def getAllUsers(conn):
-    users = select_all_users(conn)  # from db
-    resevedusers = users[0]
-    # {1: "id", 2: "name", 3: "birthday", 4: "address", 5: "age"}
-    userArray = []
-    for key in users:
-        user = str(key).split(", ")
+def getAllTestUsers(conn):
+    test_users = select_all_user_tests(conn)  # from db
+    # {1: "test_id", 2: "name", 3: "birthday", 4: "address"}
+    userTestArray = []
+    for key in test_users:
+        testUser = str(key).split(", ")
         index = 0
-        for item in user:
+        for item in testUser:
             newitem = item.strip("(")
             newitem = newitem.strip(")")
-            user[index] = newitem.strip("'")
+            testUser[index] = newitem.strip("'")
             index += 1
-        id = user[0]
-        user.pop(0)
-        user.append(id)
-        trv.insert('', 'end', values=user)
-        userArray.append(user)
+        id = testUser[0]
+        testUser.pop(0)
+        testUser.append(id)
+        trv.insert('', 'end', values=testUser)
+        userTestArray.append(testUser)
 
 
-def getUserData(connection, id):
-    userData = {}
-    userSchema = {1: "id", 2: "name", 3: "birthday", 4: "address", 5: "age"}
+def getUserTestData(connection, id):
+    userTestData = {}
+    userTestSchema = {
+        1: "test_id", 2: "name", 3: "birthday", 4: "address",
+        5:  "date_for_cbc",
+        6:  "wbc",
+        7:  "ly%",
+        8:  "mo%",
+        9:  "gr%",
+        10: "ly",
+        11: "mo",
+        12: "gr",
+        13: "rbc",
+        14: "hbg",
+        15: "gct",
+        16: "mcv",
+        17: "mch",
+        18: "mchc",
+        19: "plt",
+        20: "pct",
+        21: "mpv",
+        22: "pdw",
+        23: "unnoun",
+        24: "unnoun2"
+    }
     if id == 0:
         return "fail"
     else:
-        reseveduserData = str(select_user_by_id(connection, id)[0]).split(", ")
+        reseveduserData = str(select_user_test_by_test_id(
+            connection, id)[0]).split(", ")
         index = 1
         for item in reseveduserData:
             newitem = item.strip("(")
             newitem = newitem.strip(")")
             newitem = newitem.strip("'")
-            userData[userSchema[index]] = newitem
+            userTestData[userTestSchema[index]] = newitem
             index += 1
-        return userData
+        return userTestData
 
 
-def deleteUser(conn, id):
+def deleteUserTest(conn, id):
     """
-    Delete a user by user id
+    Delete a user_test by user_test test_id
     :param conn:  Connection to the SQLite database
-    :param id: id of the user
+    :param test_id: test_id of the user_test
     :return:
     """
-    sql = 'DELETE FROM users WHERE id=?'
+    sql = 'DELETE FROM user_tests WHERE test_id=?'
     cur = conn.cursor()
     cur.execute(sql, (id,))
     conn.commit()
@@ -108,59 +130,118 @@ window = Tk()
 
 wrapper1 = LabelFrame(
     window,
-    text="user List",
+    text="user_test List",
 )
 
 wrapper1.pack(fill="both", expand="yes", padx=20, pady=10)
 
-trv = Treeview(wrapper1, columns=(1, 2, 3, 4, 5), show="headings")
+trv = Treeview(wrapper1, columns=(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+               12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24), show="headings")
 trv.pack()
 
 
 trv.heading(1, text="name")
 trv.heading(2, text="birthday")
 trv.heading(3, text="address")
-trv.heading(4, text="age")
-trv.heading(5, text="User Id")
-getAllUsers(create_connection(database))
+trv.heading(4, text="date_for_cbc")
+trv.heading(5, text="wbc")
+trv.heading(6, text="ly%")
+trv.heading(7, text="mo%")
+trv.heading(8, text="gr%")
+trv.heading(9, text="ly")
+trv.heading(10, text="mo")
+trv.heading(11, text="gr")
+trv.heading(12, text="rbc")
+trv.heading(13, text="hbg")
+trv.heading(14, text="gct")
+trv.heading(15, text="mcv")
+trv.heading(16, text="mch")
+trv.heading(17, text="mchc")
+trv.heading(18, text="plt")
+trv.heading(19, text="pct")
+trv.heading(20, text="mpv")
+trv.heading(21, text="pdw")
+trv.heading(22, text="unnoun")
+trv.heading(23, text="unnoun2")
+trv.heading(24, text="user_test Id")
+getAllTestUsers(create_connection(database))
 
 
 def getrow(event):
-    rowid = trv.identify_row(event.y)
     item = trv.item(trv.focus())["values"]
-
     update_window(item)
 
 
 def refresh():
     trv.delete(*trv.get_children())
-    getAllUsers(create_connection(database))
+    getAllTestUsers(create_connection(database))
 
 
 window.title("admin pannale")
-window.geometry("800x500")
+window.geometry("1200x500")
 trv.bind('<Double 1>', getrow)
 
 
 def update_window(item):
-    # { 0: "name", 1: "birthday", 2: "address", 3: "age",4: "id"}
+    # { 0: "name", 1: "birthday", 2: "address", 3: "test_id"}
     window1 = Tk()
     name_input = StringVar(window1)
     birthday_input = StringVar(window1)
     address_input = StringVar(window1)
-    age_input = StringVar(window1)
     id_input = StringVar(window1)
+    date_for_cbc = StringVar(window1)
+    wbc = StringVar(window1)
+    ly = StringVar(window1)
+    mo = StringVar(window1)
+    gr = StringVar(window1)
+    ly = StringVar(window1)
+    mo = StringVar(window1)
+    gr = StringVar(window1)
+    rbc = StringVar(window1)
+    hbg = StringVar(window1)
+    gct = StringVar(window1)
+    mcv = StringVar(window1)
+    mch = StringVar(window1)
+    mchc = StringVar(window1)
+    plt = StringVar(window1)
+    pct = StringVar(window1)
+    mpv = StringVar(window1)
+    pdw = StringVar(window1)
+    unnoun = StringVar(window1)
+    unnoun2 = StringVar(window1)
+
     name_input.set(item[0])
     birthday_input.set(item[1])
     address_input.set(item[2])
-    age_input.set(item[3])
-    id_input.set(item[4])
+    id_input.set(item[23])
+
+    date_for_cbc.set(item[3])
+    wbc.set(item[4])
+    ly.set(item[5])
+    mo.set(item[6])
+    gr.set(item[7])
+    ly.set(item[8])
+    mo.set(item[9])
+    gr.set(item[10])
+    rbc.set(item[11])
+    hbg.set(item[12])
+    gct.set(item[13])
+    mcv.set(item[14])
+    mch.set(item[15])
+    mchc.set(item[16])
+    plt.set(item[17])
+    pct.set(item[18])
+    mpv.set(item[19])
+    pdw.set(item[20])
+    unnoun.set(item[21])
+    unnoun2.set(item[22])
 
     def clickDelete():
         id = id_input.get()
-        if messagebox.askyesno("Confirm Delete?", "Are you dure you want to delete this User?"):
-            deleteUser(create_connection(database), id)
+        if messagebox.askyesno("Confirm Delete?", "Are you dure you want to delete this user_test?"):
+            deleteUserTest(create_connection(database), id)
             refresh()
+            window1.destroy()
         else:
             return True
 
@@ -170,7 +251,7 @@ def update_window(item):
         message = """<html>
         <head>
             <link rel="icon" type="image/jpg" href="browser.jpg"/>
-            <title>User Informaition</title>
+            <title>User Test Informaition</title>
             <style>
                 .container {
                     width: 50%;
@@ -180,15 +261,38 @@ def update_window(item):
                     border-radius: 3px;
                     border: 2px solid #FF3F00;
                 }
+                h3 {
+                    text-transform: uppercase;
+                }
             </style>
         </head>
         <body>
             <div class="container">
                 <h1>The company header</h1>
                 <h2>"""+header+"""</h2>
-                <h3>Age: """+age_input.get()+"""<h3/>
                 <h3>Address: """+address_input.get()+"""<h3/>
                 <h3>Birthday: """+birthday_input.get()+"""<h3/>
+                <h3>date_for_cbc: """+date_for_cbc.get()+"""<h3/>
+                <h3>wbc: """+wbc.get()+"""<h3/>
+                <h3>ly: """+ly.get()+"""<h3/>
+                <h3>mo: """+mo.get()+"""<h3/>
+                <h3>gr: """+gr.get()+"""<h3/>
+                <h3>ly: """+ly.get()+"""<h3/>
+                <h3>mo: """+mo.get()+"""<h3/>
+                <h3>gr: """+gr.get()+"""<h3/>
+                <h3>rbc: """+rbc.get()+"""<h3/>
+                <h3>hbg: """+hbg.get()+"""<h3/>
+                <h3>gct: """+gct.get()+"""<h3/>
+                <h3>mcv: """+mcv.get()+"""<h3/>
+                <h3>mch: """+mch.get()+"""<h3/>
+                <h3>mchc: """+mchc.get()+"""<h3/>
+                <h3>plt: """+plt.get()+"""<h3/>
+                <h3>pct: """+pct.get()+"""<h3/>
+                <h3>mpv: """+mpv.get()+"""<h3/>
+                <h3>pdw: """+pdw.get()+"""<h3/>
+                <h3>unnoun: """+unnoun.get()+"""<h3/>
+                <h3>unnoun2: """+unnoun2.get()+"""<h3/>
+
                 <h4>The company footer</h4>
             <div/>
         </body>
@@ -197,6 +301,7 @@ def update_window(item):
         f.write(message)
         f.close()
         webbrowser.open('UserInfo.html')
+        window1.destroy()
 
     def validation():
         birthday = birthday_input.get().split("-")
@@ -210,14 +315,8 @@ def update_window(item):
                             if int(birthday[1]) < 13 and int(birthday[1]) > 0:
                                 if int(birthday[2]) > 1860 and int(birthday[2]) < 2014:
                                     if address_input.get().isnumeric() != True:
-                                        if age_input.get().isnumeric() != False:
-                                            if int(age_input.get()) < 120 and int(age_input.get()) > 9:
-                                                messagebox.showinfo(
-                                                    "Done", "Verifed with no error")
-                                            else:
-                                                return True, "- age must be from 10 to 120\n"
-                                        else:
-                                            return True, "- age must be number Not string\n"
+                                        messagebox.showinfo(
+                                            "Done", "Verifed with no error")
                                     else:
                                         return True, "- address must be text not a number\n"
                                 else:
@@ -237,36 +336,34 @@ def update_window(item):
         return errorState, errorMessage
 
     def clickUpdate():
-        if messagebox.askyesno("Confirm Update?", "Are you dure you want to Update this User?"):
+        if messagebox.askyesno("Confirm Update?", "Are you dure you want to Update this User Test?"):
             errorState = False
             errorMessage = ''
-            userDict = {
-                "id": '0',
+            userTestDict = {
+                "test_id": '0',
                 "name": '',
                 "birthday": '',
                 "address": '',
-                "age": '0'
             }
             isValid = validation()
             errorState = isValid[0]
             errorMessage = isValid[1]
             if name_input.get() != '':
-                userDict["name"] = name_input.get()
+                userTestDict["name"] = name_input.get()
             if birthday_input.get() != '':
-                userDict["birthday"] = birthday_input.get()
+                userTestDict["birthday"] = birthday_input.get()
             if address_input.get() != '':
-                userDict["address"] = address_input.get()
-            if age_input.get() != '':
-                userDict["age"] = age_input.get()
+                userTestDict["address"] = address_input.get()
             if id_input.get() != '':
-                userDict["id"] = id_input.get()
+                userTestDict["test_id"] = id_input.get()
             if errorState == False:
                 updateAndCheckIsUpdatedSuccessfully(
-                    userDict,
-                    userDict["id"],
+                    userTestDict,
+                    userTestDict["test_id"],
                     create_connection(database)
                 )
                 refresh()
+                window1.destroy()
             else:
                 messagebox.showwarning("Wrong", errorMessage)
     label = Label(window1, text="This is a update window")
@@ -314,87 +411,71 @@ def update_window(item):
         width=50,
     ).grid(row=3, column=3)
 
-    Label(
-        window1,
-        text="Age",
-        foreground="white",
-        background="#34A2FE",
-        width=10,
-    ).grid(row=4, column=0)
-
-    Entry(
-        window1,
-        textvariable=age_input,
-        width=50,
-    ).grid(row=4, column=3)
     updateBtn = Button(
-        window1, text="Update User", command=clickUpdate)
-    updateBtn.grid(row=6, column=0, padx=5, pady=3)
+        window1, text="Update user_test", command=clickUpdate)
+    updateBtn.grid(row=5, column=0, padx=5, pady=3)
 
     deleteBtn = Button(
-        window1, text="delete User", command=clickDelete)
-    deleteBtn.grid(row=6, column=1, padx=5, pady=3)
+        window1, text="delete user_test", command=clickDelete)
+    deleteBtn.grid(row=5, column=1, padx=5, pady=3)
 
     printBtn = Button(
-        window1, text="Print User Data", command=clickPrint)
-    printBtn.grid(row=6, column=2, padx=5, pady=3)
+        window1, text="Print user_test Data", command=clickPrint)
+    printBtn.grid(row=5, column=2, padx=5, pady=3)
 
 # ------------------------------------------------
 
 
-# query for update user data
-def update_user(conn, user):
+# query for update user_test data
+def update_user_test(conn, user_test):
     """
-    update name, birthday, address and age of a user
+    update name and birthday address of a user_test
     :param conn:
-    :param user:
-    :return: project id
+    :param user_test:
+    :return: project test_id
     """
-    sql = ''' UPDATE users
-              SET name = ? ,
-                  address = ? ,
-                  age = ? ,
-                  birthday = ?
-              WHERE id = ?'''
+    sql = ''' UPDATE user_tests
+              SET "name" = ? ,
+                  "address" = ? ,
+                  "birthday" = ?
+              WHERE test_id = ?'''
     cur = conn.cursor()
-    cur.execute(sql, user)
+    cur.execute(sql, user_test)
+
     conn.commit()
 
 
-# execute update taple user
-# updateUser("keyInDB", "newvalue")
-def updateUser(newUser, user):
-    newDictUser = dict()
-    if newUser["id"] == 0:
-        return newDictUser, False
+# execute update taple user_test
+def updateUserTest(newUserTest, user_tests):
+    newDictUserTest = dict()
+    if newUserTest["test_id"] == 0:
+        return newDictUserTest, False
     # copy and update
-    for key in user:
-        if newUser[key] != '' and newUser[key] != '0':
-            newDictUser[key] = newUser[key]
-        else:
-            newDictUser[key] = user[key]
+    for key in user_tests:
+        if key == "test_id" or key == "name" or key == "birthday" or key == "address":
+            if newUserTest[key] != '' and newUserTest[key] != '0':
+                newDictUserTest[key] = newUserTest[key]
+            else:
+                newDictUserTest[key] = user_tests[key]
 
-    isSuccess = newDictUser != user
-    return newDictUser, isSuccess
+    isSuccess = newDictUserTest["test_id"] != user_tests["test_id"] or newDictUserTest["name"] != user_tests["name"] or newDictUserTest[
+        "birthday"] != user_tests["birthday"] or newDictUserTest["address"] != user_tests["address"]
+    print(isSuccess)
+    return newDictUserTest, isSuccess
 
 
 # checkIsUpdate("keyInDB", "newvalue", connection)
-def updateAndCheckIsUpdatedSuccessfully(updateUserData, id, connection):
+def updateAndCheckIsUpdatedSuccessfully(updateUserTestData, id, connection):
 
-    userData = updateUser(updateUserData, getUserData(connection, id))
-    if userData[1] == False:
+    userTestData = updateUserTest(
+        updateUserTestData, getUserTestData(connection, id))
+    if userTestData[1] == False:
         messagebox.showwarning(
             "Wrong", "Problem in update, enter the new data in the forms")
     else:
-        update_user(connection, (userData[0]["name"], userData[0]["address"],
-                                 userData[0]["age"], userData[0]["birthday"], userData[0]["id"]))
-        UserDataFromDatabase = getUserData(connection, userData[0]["id"])
-        isUpdated = UserDataFromDatabase == userData[0]
-        if isUpdated:
-            messagebox.showinfo("Success", "Done Done :)")
-        else:
-            messagebox.showwarning(
-                "Wrong", "Problem in update, enter the new data in the forms")
+        update_user_test(connection, (userTestData[0]["name"], userTestData[0]["address"],
+                                      userTestData[0]["birthday"], userTestData[0]["test_id"]))
+        messagebox.showinfo("Succzess", "Done Done :)")
 
 
 # -------------------------------------------------------------
