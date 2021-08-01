@@ -1,12 +1,21 @@
 from os import name, path
 import webbrowser
 import sqlite3
+import serial
+import time
+import traceback
+import datetime
+import requests
 from sqlite3 import Error
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
-database = r"C:\sqlite\db\pythonsqlitek.db"
+from threading import Thread
+database = r"pythonsqlitek.db"
+#port = '/dev/serial/by-id/usb-Prolific_Technology_Inc._USB-Serial_Controller_D-if00-port0'
+port = '/dev/ttyUSB0'
+baud = 9600
 
 
 def create_connection(db_file):
@@ -23,6 +32,45 @@ def create_connection(db_file):
         print(e)
 
     return conn
+
+
+def create_user_test(conn, userTest):
+    """
+    Create a new user_test
+    :param conn:
+    :param user:
+    :return:
+    """
+
+    sql = ''' INSERT INTO user_tests(
+        name,
+        birthday, 
+        address, 
+        date_for_cbc,
+        test_id,
+        wbc,
+        "ly%",
+        "mo%",
+        "gr%",
+        ly,
+        mo,
+        gr,
+        rbc,
+        hbg,
+        gct,
+        mcv,
+        mch,
+        mchc,
+        plt,
+        pct,
+        mpv,
+        pdw
+    )
+        VALUES(? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?) '''
+    cur = conn.cursor()
+    cur.execute(sql, userTest)
+    conn.commit()
+    return cur.lastrowid
 
 
 def select_user_test_by_test_id(conn, id):
@@ -65,8 +113,8 @@ def getAllTestUsers(conn):
             newitem = newitem.strip(")")
             testUser[index] = newitem.strip("'")
             index += 1
-        id = testUser[0]
-        testUser.pop(0)
+        id = testUser[4]
+        testUser.pop(4)
         testUser.append(id)
         trv.insert('', 'end', values=testUser)
         userTestArray.append(testUser)
@@ -75,8 +123,8 @@ def getAllTestUsers(conn):
 def getUserTestData(connection, id):
     userTestData = {}
     userTestSchema = {
-        1: "test_id", 2: "name", 3: "birthday", 4: "address",
-        5:  "date_for_cbc",
+        1: "name", 2: "birthday", 3: "address", 4: "date_for_cbc",
+        5:  "test_id",
         6:  "wbc",
         7:  "ly%",
         8:  "mo%",
@@ -93,9 +141,7 @@ def getUserTestData(connection, id):
         19: "plt",
         20: "pct",
         21: "mpv",
-        22: "pdw",
-        23: "unnoun",
-        24: "unnoun2"
+        22: "pdw"
     }
     if id == 0:
         return "fail"
@@ -161,9 +207,7 @@ trv.heading(18, text="plt")
 trv.heading(19, text="pct")
 trv.heading(20, text="mpv")
 trv.heading(21, text="pdw")
-trv.heading(22, text="unnoun")
-trv.heading(23, text="unnoun2")
-trv.heading(24, text="user_test Id")
+trv.heading(22, text="user_test Id")
 getAllTestUsers(create_connection(database))
 
 
@@ -177,12 +221,62 @@ def refresh():
     getAllTestUsers(create_connection(database))
 
 
+def add_user_test_from_CBC():
+    ser = serial.Serial(port, baud, timeout=1)
+    ser.flushInput()
+
+    print("name" + ser.name)
+
+    attrib_CBC = ["Date", "ID", "WBC", "LY%", "MO%", "GR%", "LY", "MO", "GR",
+                  "RBC", "HBG", "HCT", "MCV", "MCH", "MCHC", "PLT", "PCT", "MPV", "PDW"]
+    print(len(attrib_CBC))
+
+    oldline = []
+    a = 0
+    while (a == 0):
+        try:
+            i = 0
+            line = ser.readline()                 # read bytes until line-ending
+            line = line.decode('UTF-8', 'ignore')  # convert to string
+            # remove line-ending characters
+            line = line.rstrip('\r\n')
+
+            split_line = line.splitlines()
+            user_test = ['DClick to edit the user test', 'data', '']
+            if oldline != split_line:
+                for item in split_line:
+                    if i < 19:
+                        item = item.strip(" ")
+                        item = item.strip("\x02")
+                        item = item.strip("\x03")
+                        print("i " + item)
+                        user_test.append(item)
+                        i += 1
+                print(split_line)
+                print("userT" + str(tuple(user_test)))
+                print(create_user_test(create_connection(database),  user_test))
+                refresh()
+    #'', '', '', '21/07/05', '0005', '0.1L', '', '', '', '', '', '', '0.01L', '0.3L', '0.1L', '100', 'OVER', 'OVER', '',
+                # '5L', '', '')
+
+        except Exception:
+            traceback.print_exc()
+            print("exiting")
+            #print("Keyboard Interrupt")
+            # break doesn't quit now on error.
+
+
+def threaded_function():
+    add_user_test_from_CBC()
+
+
 window.title("admin pannale")
 window.geometry("1200x500")
 trv.bind('<Double 1>', getrow)
 
 
 def update_window(item):
+    print(item)
     # { 0: "name", 1: "birthday", 2: "address", 3: "test_id"}
     window1 = Tk()
     name_input = StringVar(window1)
@@ -207,13 +301,11 @@ def update_window(item):
     pct = StringVar(window1)
     mpv = StringVar(window1)
     pdw = StringVar(window1)
-    unnoun = StringVar(window1)
-    unnoun2 = StringVar(window1)
 
     name_input.set(item[0])
     birthday_input.set(item[1])
     address_input.set(item[2])
-    id_input.set(item[23])
+    id_input.set(item[21])
 
     date_for_cbc.set(item[3])
     wbc.set(item[4])
@@ -233,8 +325,6 @@ def update_window(item):
     pct.set(item[18])
     mpv.set(item[19])
     pdw.set(item[20])
-    unnoun.set(item[21])
-    unnoun2.set(item[22])
 
     def clickDelete():
         id = id_input.get()
@@ -290,8 +380,6 @@ def update_window(item):
                 <h3>pct: """+pct.get()+"""<h3/>
                 <h3>mpv: """+mpv.get()+"""<h3/>
                 <h3>pdw: """+pdw.get()+"""<h3/>
-                <h3>unnoun: """+unnoun.get()+"""<h3/>
-                <h3>unnoun2: """+unnoun2.get()+"""<h3/>
 
                 <h4>The company footer</h4>
             <div/>
@@ -368,24 +456,16 @@ def update_window(item):
                 messagebox.showwarning("Wrong", errorMessage)
     label = Label(window1, text="This is a update window")
     label.grid(row=0, column=0)
-
     Label(
         window1,
-        text="Username",
+        text="Test Id: " + id_input.get(),
         foreground="white",
         background="#34A2FE",
         width=10,
     ).grid(row=1, column=0)
-
-    Entry(
-        window1,
-        textvariable=name_input,
-        width=50,
-    ).grid(row=1, column=3)
-
     Label(
         window1,
-        text="Birthday",
+        text="Username",
         foreground="white",
         background="#34A2FE",
         width=10,
@@ -393,13 +473,13 @@ def update_window(item):
 
     Entry(
         window1,
-        textvariable=birthday_input,
+        textvariable=name_input,
         width=50,
     ).grid(row=2, column=3)
 
     Label(
         window1,
-        text="Address",
+        text="Birthday",
         foreground="white",
         background="#34A2FE",
         width=10,
@@ -407,21 +487,35 @@ def update_window(item):
 
     Entry(
         window1,
-        textvariable=address_input,
+        textvariable=birthday_input,
         width=50,
     ).grid(row=3, column=3)
 
+    Label(
+        window1,
+        text="Address",
+        foreground="white",
+        background="#34A2FE",
+        width=10,
+    ).grid(row=4, column=0)
+
+    Entry(
+        window1,
+        textvariable=address_input,
+        width=50,
+    ).grid(row=4, column=3)
+
     updateBtn = Button(
         window1, text="Update user_test", command=clickUpdate)
-    updateBtn.grid(row=5, column=0, padx=5, pady=3)
+    updateBtn.grid(row=6, column=0, padx=5, pady=3)
 
     deleteBtn = Button(
         window1, text="delete user_test", command=clickDelete)
-    deleteBtn.grid(row=5, column=1, padx=5, pady=3)
+    deleteBtn.grid(row=6, column=1, padx=5, pady=3)
 
     printBtn = Button(
         window1, text="Print user_test Data", command=clickPrint)
-    printBtn.grid(row=5, column=2, padx=5, pady=3)
+    printBtn.grid(row=6, column=2, padx=5, pady=3)
 
 # ------------------------------------------------
 
@@ -482,7 +576,8 @@ def updateAndCheckIsUpdatedSuccessfully(updateUserTestData, id, connection):
 
 
 def main():
-
+    thread = Thread(target=threaded_function, args=[])
+    thread.start()
     # create a database connection
     conn = create_connection(database)
     with conn:
