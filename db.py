@@ -44,6 +44,7 @@ def create_user_test(conn, userTest):
         birthday, 
         address, 
         date_for_cbc,
+        test_id,
         wbc,
         "ly%",
         "mo%",
@@ -60,11 +61,9 @@ def create_user_test(conn, userTest):
         plt,
         pct,
         mpv,
-        pdw,
-        unnoun,
-        unnoun2
+        pdw
     )
-        VALUES(? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?) '''
+        VALUES(? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?) '''
     cur = conn.cursor()
     cur.execute(sql, userTest)
     conn.commit()
@@ -100,8 +99,6 @@ def update_user_test(conn, userTest):
                   "pct" = ?,
                   "mpv" = ?,
                   "pdw" = ?,
-                  "unnoun" = ?,
-                  "unnoun2" = ?,
               WHERE test_id = ?'''
     cur = conn.cursor()
     cur.execute(sql, userTest)
@@ -109,37 +106,35 @@ def update_user_test(conn, userTest):
 
 
 def main():
-    database = r"C:\sqlite\db\pythonsqlitek.db"
+    database = "pythonsqlitek.db"
     # {
-    #      1:  test_id,
-    #      5:  date_for_cbc,
-    #      6:  wbc,
-    #      7:  ly%,
-    #      8:  mo%,
-    #      9:  gr%,
-    #      10: ly,
-    #      11: mo,
-    #      12: gr,
-    #      13: rbc,
-    #      14: hbg,
-    #      15: gct,
-    #      16: mcv,
-    #      17: mch,
-    #      18: mchc,
-    #      19: plt,
-    #      20: pct,
-    #      21: mpv,
-    #      22: pdw,
-    #      23: unnoun,
-    #      24: unnoun2
+    #      3:  date_for_cbc,
+    #      4:  test_id,
+    #      5:  wbc,
+    #      6:  ly%,
+    #      7:  mo%,
+    #      8:  gr%,
+    #      9: ly,
+    #      10: mo,
+    #      11: gr,
+    #      12: rbc,
+    #      13: hbg,
+    #      14: gct,
+    #      15: mcv,
+    #      16: mch,
+    #      17: mchc,
+    #      18: plt,
+    #      19: pct,
+    #      20: mpv,
+    #      21: pdw
     # }
 
     sql_create_user_tests_table = """ CREATE TABLE IF NOT EXISTS user_tests (
-                                        test_id INTEGER PRIMARY KEY,
                                         name text NOT NULL,
                                         birthday TEXT,
                                         address TEXT,
                                         date_for_cbc TEXT,
+                                        test_id INTEGER UNIQUE,
                                         wbc TEXT,
                                         "ly%" TEXT,
                                         "mo%" TEXT,
@@ -156,9 +151,7 @@ def main():
                                         plt TEXT,
                                         pct TEXT,
                                         mpv TEXT,
-                                        pdw TEXT,
-                                        unnoun TEXT,
-                                        unnoun2 TEXT
+                                        pdw TEXT
                                     ); """
 
     # create a database connection
@@ -168,13 +161,14 @@ def main():
     if conn is not None:
         # create user_tests table
         create_table(conn, sql_create_user_tests_table)
+        # user_test_1 = ('', '', '', "21-12-1", "11", "22", "33",
+        #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "14", "15")
+        #create_user_test(conn, user_test_1)
 
     else:
         print("Error! cannot create the database connection.")
 
      # user_test
-    user_test_1 = ('husin', '22-01-1999', 'Gaza', "21-12-1", "11", "22", "33",
-                   "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
 
     # user_2 = ('hassan', '22-01-1999', 'Khaniuones', "21-12-1", "11", "22", "33",
     #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
@@ -196,7 +190,6 @@ def main():
     #            "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
 
     # create users
-    create_user_test(conn, user_test_1)
     # create_user_test(conn, user_2)
     # create_user_test(conn, user_3)
     # create_user_test(conn, user_4)
