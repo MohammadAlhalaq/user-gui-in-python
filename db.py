@@ -16,7 +16,7 @@ def create_connection(db_file):
         print(e)
 
     return conn
-
+    
 
 def create_table(conn, create_table_sql):
     """ create a table from the create_table_sql statement
@@ -42,7 +42,9 @@ def create_user_test(conn, userTest):
     sql = ''' INSERT INTO user_tests(
         name, 
         birthday, 
-        address, 
+        address,
+        identification,
+        sex,
         date_for_cbc,
         test_id,
         wbc,
@@ -53,17 +55,18 @@ def create_user_test(conn, userTest):
         mo,
         gr,
         rbc,
-        hbg,
-        gct,
+        hgb,
+        hct,
         mcv,
         mch,
         mchc,
+        rdw,
         plt,
         pct,
         mpv,
         pdw
     )
-        VALUES(? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?) '''
+        VALUES(? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?) '''
     cur = conn.cursor()
     cur.execute(sql, userTest)
     conn.commit()
@@ -80,6 +83,8 @@ def update_user_test(conn, userTest):
     sql = ''' UPDATE user_tests
               SET "name" = ? ,
                   "address" = ? ,
+                  "identification" = ?,
+                  "sex" = ?,
                   "birthday" = ?,
                   "date_for_cbc" = ?,
                   "wbc" = ?,
@@ -90,11 +95,12 @@ def update_user_test(conn, userTest):
                   "mo" = ?,
                   "gr" = ?,
                   "rbc" = ?,
-                  "hbg" = ?,
-                  "gct" = ?,
+                  "hgb" = ?,
+                  "hct" = ?,
                   "mcv" = ?,
                   "mch" = ?,
                   "mchc" = ?,
+                  "rdw" = ?,
                   "plt" = ?,
                   "pct" = ?,
                   "mpv" = ?,
@@ -118,23 +124,27 @@ def main():
     #      10: mo,
     #      11: gr,
     #      12: rbc,
-    #      13: hbg,
-    #      14: gct,
+    #      13: hgb,
+    #      14: hct,
     #      15: mcv,
     #      16: mch,
     #      17: mchc,
-    #      18: plt,
-    #      19: pct,
-    #      20: mpv,
-    #      21: pdw
+    #      18: rdw,
+    #      19: plt,
+    #      20: pct,
+    #      21: mpv,
+    #      22: pdw
     # }
 
     sql_create_user_tests_table = """ CREATE TABLE IF NOT EXISTS user_tests (
+                                        id INTEGER PRIMARY KEY,
                                         name text NOT NULL,
                                         birthday TEXT,
                                         address TEXT,
+                                        identification TEXT,
+                                        sex TEXT,
                                         date_for_cbc TEXT,
-                                        test_id INTEGER UNIQUE,
+                                        test_id INTEGER,
                                         wbc TEXT,
                                         "ly%" TEXT,
                                         "mo%" TEXT,
@@ -143,11 +153,12 @@ def main():
                                         mo TEXT,
                                         gr TEXT,
                                         rbc TEXT, 
-                                        hbg TEXT,
-                                        gct TEXT,
+                                        hgb TEXT,
+                                        hct TEXT,
                                         mcv TEXT,
                                         mch TEXT,
                                         mchc TEXT,
+                                        rdw TEXT,
                                         plt TEXT,
                                         pct TEXT,
                                         mpv TEXT,
@@ -161,44 +172,43 @@ def main():
     if conn is not None:
         # create user_tests table
         create_table(conn, sql_create_user_tests_table)
-        # user_test_1 = ('', '', '', "21-12-1", "11", "22", "33",
+        #user_test_1 = ('', '', '', "21-12-1", "11", "22", "33",
         #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "14", "15")
         #create_user_test(conn, user_test_1)
+        user_2 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "211","11",  "22", "22", "33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "44")
+        user_3 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "2112","11",  "22","22",  "33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "44")
 
+        user_4 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "21113","11",  "22", "33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "22", "33", "44")
+
+        user_5 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "299","11",  "22", "33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "22", "44")
+
+        user_6 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "212","11",  "22","22", "33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "44")
+
+        user_7 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "2110","11",  "22","22", "33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "44")
+
+        user_8 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "2111","11",  "22", "22","33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "44")
+
+        user_9 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "2119","11",  "22", "22","33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "44")
+
+        user_10 = ('hassan', '22-01-1999', 'Khaniuones', "7847347893478", "male", "21-12-1", "2118","11",  "22", "22","33","44", "55", "66", "77", "88", "10", "11", "12", "13", "14", "15", "16", "33", "44")
+
+        #create users(
+        create_user_test(conn, user_2)
+        create_user_test(conn, user_3)
+        create_user_test(conn, user_4)
+        create_user_test(conn, user_5)
+        create_user_test(conn, user_6)
+        create_user_test(conn, user_7)
+        create_user_test(conn, user_8)
+        create_user_test(conn, user_9)
+        create_user_test(conn, user_10)
     else:
         print("Error! cannot create the database connection.")
 
      # user_test
+    
 
-    # user_2 = ('hassan', '22-01-1999', 'Khaniuones', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
-    # user_3 = ('husin', '22-01-1999', 'Gaza', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16")
-    # user_4 = ('hassan', '22-01-1999', 'Khaniuones', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
-    # user_5 = ('husin', '22-01-1999', 'Gaza', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16")
-    # user_6 = ('hassan', '22-01-1999', 'Khaniuones', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
-    # user_7 = ('husin', '22-01-1999', 'Gaza', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16")
-    # user_8 = ('hassan', '22-01-1999', 'Khaniuones', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
-    # user_9 = ('husin', '22-01-1999', 'Gaza', "21-12-1", "11", "22", "33",
-    #           "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
-    # user_10 = ('hassan', '22-01-1999', 'Khaniuones', "21-12-1", "11", "22", "33",
-    #            "44", "55", "66", "77", "88", "99", "10", "11", "12", "13", "14", "15", "16", "33", "44", "44")
-
-    # create users
-    # create_user_test(conn, user_2)
-    # create_user_test(conn, user_3)
-    # create_user_test(conn, user_4)
-    # create_user_test(conn, user_5)
-    # create_user_test(conn, user_6)
-    # create_user_test(conn, user_7)
-    # create_user_test(conn, user_8)
-    # create_user_test(conn, user_9)
-    # create_user_test(conn, user_10)
+     
 
 
 if __name__ == '__main__':
